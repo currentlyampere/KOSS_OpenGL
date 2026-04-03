@@ -24,7 +24,20 @@ int main() {
         glfwTerminate();
         return -1;
     }
-    
+//Defining Vertices of Triangle
+    float vertices[] = {
+     0.0f,  0.5f, 0.0f,   // top
+    -0.5f, -0.5f, 0.0f,   // left
+     0.5f, -0.5f, 0.0f    // right
+    };
+//(VBO)Sending this data to a memory block in GPU(buffer)
+    unsigned int VBO;                       //creating ID for Buffer
+    glGenBuffers(1, &VBO);                  // creating buffer and storing its ID
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);     // Sets VBO as current buffer. GL_ARRAY_BUFFER=> This buffer will store vertex attributes
+    //Filling the buffer with data
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    //                                                          its gonna be const. data
+
     //RENDER LOOP
     while (!glfwWindowShouldClose(window)) 
     {      
