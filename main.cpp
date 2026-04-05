@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 //talks to OS
 #include <iostream>
+#include <cmath>
 
 int main() {
     //INTIALIZING
@@ -50,14 +51,17 @@ int main() {
     glEnableVertexAttribArray(0);               //turning on attribute on location 
 //Writing Shaders as strings..
     const char* vertexShaderSource =
-        "#version 330 core\n"                   //version specifcation
-        "layout (location = 0) in vec3 aPos;\n"
-        //Take input from attribute location 0, which is 3 floats (vec3), and call it aPos
-        "void main()\n"
-        "{\n"
-        "   gl_Position = vec4(aPos, 1.0);\n"
-        "}\0";
-     const char* fragmentShaderSource =
+    R"(#version 330 core
+    layout (location = 0) in vec3 aPos;
+
+    uniform vec3 offset;  // 3 dim vector will be sent by CPU named "vector"
+                         //uniform-> CPU
+    void main()
+    {
+        gl_Position = vec4(aPos + offset, 1.0); // aPos +offset => vector addition
+    })";
+
+    const char* fragmentShaderSource =
         "#version 330 core\n"
         "out vec4 FragColor;\n"
         "void main()\n"
@@ -90,7 +94,9 @@ int main() {
  // deleting shaders after linking
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
+//producing offset
+    int offsetLocation = glGetUniformLocation(shaderProgram, "offset");
+    //creating a uniform variable and returning its "id"
 //RENDER LOOP    
     while (!glfwWindowShouldClose(window)) 
     {      
@@ -100,9 +106,17 @@ int main() {
        
          //draw traingle
         glUseProgram(shaderProgram);
+        //calculating x and y offset
+        float time = glfwGetTime();
+        float xOffset = time*cos(time) * 0.01f;
+        float yOffset = time*sin(time) * 0.01f;
+        
+        //sending uniform vect to GPU
+        glUniform3f(offsetLocation, xOffset, yOffset, 0.0f);
+        
         glBindVertexArray(VAO);                 //use this data
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
