@@ -98,6 +98,11 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f); 
         glClear(GL_COLOR_BUFFER_BIT);      
        
+         //draw traingle
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);                 //use this data
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
