@@ -47,12 +47,57 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);      //telling vertex array to use this vertex buffer
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // real instructions to how to read attributes
-    glEnableVertexAttribArray(0);               //turning on attribute on location 0
-    //RENDER LOOP    
+    glEnableVertexAttribArray(0);               //turning on attribute on location 
+//Writing Shaders as strings..
+    const char* vertexShaderSource =
+        "#version 330 core\n"                   //version specifcation
+        "layout (location = 0) in vec3 aPos;\n"
+        //Take input from attribute location 0, which is 3 floats (vec3), and call it aPos
+        "void main()\n"
+        "{\n"
+        "   gl_Position = vec4(aPos, 1.0);\n"
+        "}\0";
+     const char* fragmentShaderSource =
+        "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "   FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
+                           // R   G    B    Alpha
+        "}\0";
+//Compiling Shaders
+    unsigned int vertexShader;                                    //creating ID for shaders
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);              //assign ID to shader
+    glShaderSource(vertexShader,   1          , &vertexShaderSource, NULL);   //providing source code to the shader
+    //                 id      |only 1 string*| address of string* | lenght of string;since we have null terminated string we dont need it
+    //*we can pass more than 1 string and hence we are passing pointer to string(array of string)
+    glCompileShader(vertexShader);                                //Compiling the source code
+
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+//Linking shaders into program
+
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram); 
+
+ // deleting shaders after linking
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+//RENDER LOOP    
     while (!glfwWindowShouldClose(window)) 
     {      
+        //clear screen
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f); 
-        glClear(GL_COLOR_BUFFER_BIT);          
+        glClear(GL_COLOR_BUFFER_BIT);      
+       
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
