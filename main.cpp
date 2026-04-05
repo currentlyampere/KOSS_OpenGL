@@ -10,7 +10,7 @@ int main() {
     if (!glfwInit()) 
         return -1;
     //WINDOW POINTER
-    GLFWwindow* window = glfwCreateWindow(800, 600, "KOSS OpenGL Window", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "KOSS OpenGL Window",NULL, NULL);
     if (!window) 
     {
         glfwTerminate();
@@ -95,8 +95,10 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 //producing offset
-    int offsetLocation = glGetUniformLocation(shaderProgram, "offset");
-    //creating a uniform variable and returning its "id"
+    int offsetLocation = glGetUniformLocation(shaderProgram, "offset"); //creating a uniform variable and returning its "id"
+    float xOffset =0.0f;
+    float yOffset =0.0f;
+    
 //RENDER LOOP    
     while (!glfwWindowShouldClose(window)) 
     {      
@@ -107,10 +109,18 @@ int main() {
          //draw traingle
         glUseProgram(shaderProgram);
         //calculating x and y offset
-        float time = glfwGetTime();
-        float xOffset = time*cos(time) * 0.01f;
-        float yOffset = time*sin(time) * 0.01f;
-        
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            xOffset -= 0.0005f;
+
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            xOffset += 0.0005f;
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            yOffset +=0.0005f;
+
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            yOffset -= 0.0005f;
+
         //sending uniform vect to GPU
         glUniform3f(offsetLocation, xOffset, yOffset, 0.0f);
         
