@@ -54,27 +54,40 @@ int main() {
     R"(#version 330 core
     layout (location = 0) in vec3 aPos;
 
+    out vec2 vPos;   // send this vec2 to Fragment
+
     uniform vec3 offset;  // 3 dim vector will be sent by CPU named "offset"
-                         //uniform-> CPU
+    uniform float time;                
     void main()
     {
-        gl_Position = vec4(aPos + offset, 1.0); // aPos +offset => vector addition
+        gl_Position = vec4(aPos+ offset, 1.0);
+        vPos = aPos.xy;   // passing x and y coord of aPos to Fragment shader
     })";
 
     const char* fragmentShaderSource =
         R"(#version 330 core
-        out vec4 FragColor;
+out vec4 FragColor;
 
-        uniform float time;   //getting the time uniform 
+in vec2 vPos;
+uniform float time;
 
-        void main()
-        {
-            float r = sin(time) * 0.5 + 0.5;
-            float g = sin(time + 2.0) * 0.5 + 0.5;
-            float b = sin(time + 4.0) * 0.5 + 0.5;
+void main()
+{
+    // Normalize coords (-0.5 to 0.5 -> 0 to 1)
+    vec2 uv = vPos + 0.5;
 
-            FragColor = vec4(r, g, b, 1.0);
-        }
+    // Smooth base gradient
+    vec3 color = vec3(uv.x, uv.y, 1.0 - uv.x);
+
+    // VERY subtle animation
+    color += 0.5 * vec3(
+        sin(time * 0.5),
+        sin(time * 0.5 + 2.0),
+        sin(time * 0.5 + 4.0)
+    );
+
+    FragColor = vec4(color, 1.0);
+}
             )";
 //Compiling Shaders
     unsigned int vertexShader;                                    //creating ID for shaders
@@ -88,6 +101,25 @@ int main() {
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
+//checking compilation
+    int success;
+    char infoLog[512];
+
+    // Vertex shader
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "VERTEX ERROR:\n" << infoLog << std::endl;
+    }
+
+    // Fragment shader
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "FRAGMENT ERROR:\n" << infoLog << std::endl;
+    }
 
 //Linking shaders into program
 
@@ -113,11 +145,11 @@ int main() {
         //clear screen
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f); 
         glClear(GL_COLOR_BUFFER_BIT);      
-       
+        float time = glfwGetTime();
          //draw traingle
         glUseProgram(shaderProgram);
         //Time uniform
-        float time = glfwGetTime();
+        
         glUniform1f(timeLoc, time);
 
         //calculating x and y offset
