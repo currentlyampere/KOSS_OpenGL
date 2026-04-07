@@ -54,7 +54,7 @@ int main() {
     R"(#version 330 core
     layout (location = 0) in vec3 aPos;
 
-    uniform vec3 offset;  // 3 dim vector will be sent by CPU named "vector"
+    uniform vec3 offset;  // 3 dim vector will be sent by CPU named "offset"
                          //uniform-> CPU
     void main()
     {
@@ -62,13 +62,20 @@ int main() {
     })";
 
     const char* fragmentShaderSource =
-        "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "void main()\n"
-        "{\n"
-        "   FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
-                           // R   G    B    Alpha
-        "}\0";
+        R"(#version 330 core
+        out vec4 FragColor;
+
+        uniform float time;   //getting the time uniform 
+
+        void main()
+        {
+            float r = sin(time) * 0.5 + 0.5;
+            float g = sin(time + 2.0) * 0.5 + 0.5;
+            float b = sin(time + 4.0) * 0.5 + 0.5;
+
+            FragColor = vec4(r, g, b, 1.0);
+        }
+            )";
 //Compiling Shaders
     unsigned int vertexShader;                                    //creating ID for shaders
     vertexShader = glCreateShader(GL_VERTEX_SHADER);              //assign ID to shader
@@ -95,6 +102,7 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 //producing offset
+    int timeLoc = glGetUniformLocation(shaderProgram, "time");          // Getting location of time uniform
     int offsetLocation = glGetUniformLocation(shaderProgram, "offset"); //creating a uniform variable and returning its "id"
     float xOffset =0.0f;
     float yOffset =0.0f;
@@ -108,6 +116,10 @@ int main() {
        
          //draw traingle
         glUseProgram(shaderProgram);
+        //Time uniform
+        float time = glfwGetTime();
+        glUniform1f(timeLoc, time);
+
         //calculating x and y offset
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
             xOffset -= 0.0005f;
