@@ -1,4 +1,8 @@
 # KOSS OpenGL Selection Task
+##  Presentaion Link
+=> https://gamma.app/docs/Introduction-to-OpenGL-Rendering-Pipeline-Shaders-o47kowaqcxoi1dn
+
+I have used Gamma AI for design of ppt. However, the content on the ppt is 100% hand-typed.
 
 ##  How to Build
 To compile the project, ensure you have **MinGW** installed and run:
